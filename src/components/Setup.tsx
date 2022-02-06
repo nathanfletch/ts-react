@@ -1,10 +1,10 @@
 import React, { useState, useReducer } from "react";
 
-interface FormValues {
+interface User {
   email: string;
   firstName: string;
   lastName: string;
-  phone: string;
+  phone?: string;
 }
 
 //back button - nope
@@ -16,11 +16,12 @@ interface FormValues {
 //auto focus
 //error message for required inputs
 //2 inputs: first/last
+//go forward: display error
 
 export default function Setup() {
   const [step, setStep] = useState(1);
 
-  const reducer = (state: FormValues, updatedValues: Partial<FormValues>) => {
+  const reducer = (state: User, updatedValues: Partial<User>) => {
     return { ...state, ...updatedValues };
   };
   const [properties, dispatch] = useReducer(reducer, {
@@ -31,21 +32,16 @@ export default function Setup() {
   });
   const { email, firstName, lastName, phone } = properties;
 
+  const checkRequired = () => {
+    const requiredOnly = { ...properties };
+    delete requiredOnly.phone;
+    return Object.values(requiredOnly).every((v) => v.length > 0);
+  };
+  const hasRequired = checkRequired();
+
   // useEffect(() => {
 
   // }, [email]);
-
-  // useEffect(() => {
-  //   window.addEventListener("keydown", arrowHandler);
-  //   // Remove event listeners on cleanup
-  //   return () => {
-  //     window.removeEventListener("keydown", arrowHandler);
-  //   };
-  // }, []);
-
-  // const arrowHandler = (e) => {
-  //   console.log(e);
-  // };
 
   const previous = () => {
     if (step > 1) {
@@ -58,6 +54,19 @@ export default function Setup() {
       setStep(step + 1);
     }
   };
+
+  // const handleArrowKey = (e: any) => {
+  //   console.log(e);
+  //   if (e.key !== "ArrowLeft" || "ArrowRight") {
+  //     return;
+  //   } else {
+  //     if (e.key === "ArrowLeft") {
+  //       previous();
+  //     } else {
+  //       next();
+  //     }
+  //   }
+  // };
 
   const createAccount = () => {
     console.log("call api here");
@@ -73,8 +82,9 @@ export default function Setup() {
       <label>
         Email
         <input
-          autoFocus
           className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          autoFocus
+          onFocus={(e) => e.currentTarget.select()}
           value={email}
           onChange={(e) => dispatch({ email: e.target.value })}
           type="email"
@@ -101,11 +111,11 @@ export default function Setup() {
         {`First Name${firstName ? "" : "*"}`}
         <input
           autoFocus
+          onFocus={(e) => e.currentTarget.select()}
           className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           value={firstName}
           onChange={(e) => dispatch({ firstName: e.target.value })}
           type="text"
-          required
         />
       </label>
       <label>
@@ -117,18 +127,20 @@ export default function Setup() {
           type="text"
         />
       </label>
-      <div className="flex justify-between mt-3">
-        <button
-          className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700"
-          onClick={() => previous()}
-        >
-          Previous
-        </button>
+      <div className="flex justify-between mt-3 flex-row-reverse">
         <button
           className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700"
           type="submit"
         >
           Next
+        </button>
+        <button
+          className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700"
+          onClick={() => {
+            previous();
+          }}
+        >
+          Previous
         </button>
       </div>
     </form>
@@ -146,24 +158,25 @@ export default function Setup() {
         Phone
         <input
           autoFocus
+          onFocus={(e) => e.currentTarget.select()}
           className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           value={phone}
           onChange={(e) => dispatch({ phone: e.target.value })}
           type="text"
         />
       </label>
-      <div className="flex justify-between mt-3">
-        <button
-          className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700"
-          onClick={() => previous()}
-        >
-          Previous
-        </button>
+      <div className="flex justify-between mt-3 flex-row-reverse">
         <button
           className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700"
           type="submit"
         >
           Next
+        </button>
+        <button
+          className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700"
+          onClick={() => previous()}
+        >
+          Previous
         </button>
       </div>
     </form>
@@ -182,22 +195,22 @@ export default function Setup() {
       <h3>{`Last Name: ${lastName}`}</h3>
       <h3>{`Phone: ${phone}`}</h3>
 
-      <div className="flex justify-between mt-3">
-        <button
-          className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700"
-          onClick={() => previous()}
-        >
-          Previous
-        </button>
+      <div className="flex justify-between mt-3 flex-row-reverse">
         <button
           className={`bg-blue-500 text-white font-bold py-2 px-4 rounded${
-            Object.values(properties).every((v) => v.length > 0)
+            hasRequired
               ? " hover:bg-blue-700"
               : " opacity-50 cursor-not-allowed"
           }`}
           type="submit"
         >
           Create Account
+        </button>
+        <button
+          className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700"
+          onClick={() => previous()}
+        >
+          Previous
         </button>
       </div>
     </form>
@@ -219,21 +232,3 @@ export default function Setup() {
     </div>
   );
 }
-
-// <div className="flex justify-between">
-//   <button
-//     className="bg-blue-500 text-white font-bold py-2 px-4 rounded"
-//     onClick={() => previous()}
-//   >
-//     Previous
-//   </button>
-//   <button
-//     className={`bg-blue-500 text-white font-bold py-2 px-4 rounded${
-//       step >= 4 ? " opacity-50 cursor-not-allowed" : " hover:bg-blue-700"
-//     }`}
-//     disabled={step >= 4}
-//     onClick={() => next()}
-//   >
-//     Next
-//   </button>
-// </div>

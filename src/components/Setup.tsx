@@ -7,17 +7,6 @@ interface User {
   phone?: string;
 }
 
-//back button - nope
-//enter - form submits
-//left arrow - go back
-//"save" a form?
-//validation
-//required
-//auto focus
-//error message for required inputs
-//2 inputs: first/last
-//go forward: display error
-
 export default function Setup() {
   const [step, setStep] = useState(1);
 
@@ -32,16 +21,11 @@ export default function Setup() {
   });
   const { email, firstName, lastName, phone } = properties;
 
-  const checkRequired = () => {
+  const hasRequired = (() => {
     const requiredOnly = { ...properties };
     delete requiredOnly.phone;
     return Object.values(requiredOnly).every((v) => v.length > 0);
-  };
-  const hasRequired = checkRequired();
-
-  // useEffect(() => {
-
-  // }, [email]);
+  })();
 
   const previous = () => {
     if (step > 1) {
@@ -55,8 +39,7 @@ export default function Setup() {
     }
   };
 
-  // const handleArrowKey = (e: any) => {
-  //   console.log(e);
+  // const handleArrowKey = (e: KeyboardEvent) => {
   //   if (e.key !== "ArrowLeft" || "ArrowRight") {
   //     return;
   //   } else {
@@ -219,7 +202,12 @@ export default function Setup() {
   return (
     <div className="w-full max-w-xs">
       <h1>Account Setup</h1>
-      <h2>{`Step ${step}`}</h2>
+      <div className="flex justify-around">
+        <div onClick={() => setStep(1)}>Email</div>
+        <div onClick={() => setStep(2)}>Name</div>
+        <div onClick={() => setStep(3)}>Phone</div>
+        <div onClick={() => setStep(4)}>Confirm</div>
+      </div>
       <div className="bg-white shadow-md rounded p-6">
         {step === 1
           ? emailForm
